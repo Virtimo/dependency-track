@@ -82,7 +82,7 @@ public class DefectDojoUploader extends AbstractIntegrationPoint implements Proj
         if (testName != null && testName.getPropertyValue() != null) {
             return testName.getPropertyValue();
         }
-        return "test_title";
+        return null;
     }
 
     @Override

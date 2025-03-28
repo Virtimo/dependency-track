@@ -62,7 +62,8 @@ public class DefectDojoClient {
         InputStreamBody inputStreamBody = new InputStreamBody(findingsJson, ContentType.APPLICATION_OCTET_STREAM, "findings.json");
         request.addHeader("accept", "application/json");
         request.addHeader("Authorization", "Token " + token);
-        HttpEntity data = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+                .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
                 .addPart("file", inputStreamBody)
                 .addPart("engagement", new StringBody(engagementId, ContentType.MULTIPART_FORM_DATA))
                 .addPart("scan_type", new StringBody("Dependency Track Finding Packaging Format (FPF) Export", ContentType.MULTIPART_FORM_DATA))
@@ -71,11 +72,14 @@ public class DefectDojoClient {
                 .addPart("minimum_severity", new StringBody("Info", ContentType.MULTIPART_FORM_DATA))
                 .addPart("close_old_findings", new StringBody("true", ContentType.MULTIPART_FORM_DATA))
                 .addPart("push_to_jira", new StringBody("false", ContentType.MULTIPART_FORM_DATA))
-                .addPart("scan_date", new StringBody(DATE_FORMAT.format(new Date()), ContentType.MULTIPART_FORM_DATA))
-                .addPart("test_title", new StringBody(testTitle, ContentType.MULTIPART_FORM_DATA))
-                .build();
-        request.setEntity(data);
+                .addPart("scan_date", new StringBody(DATE_FORMAT.format(new Date()), ContentType.MULTIPART_FORM_DATA));
 
+        if (testTitle != null) {
+            builder.addPart("test_title", new StringBody(testTitle, ContentType.MULTIPART_FORM_DATA));
+        }
+
+        HttpEntity data = builder.build();
+        request.setEntity(data);
 
         try (CloseableHttpResponse response = HttpClientPool.getClient().execute(request)) {
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
@@ -170,7 +174,8 @@ public class DefectDojoClient {
         request.addHeader("accept", "application/json");
         request.addHeader("Authorization", "Token " + token);
         InputStreamBody inputStreamBody = new InputStreamBody(findingsJson, ContentType.APPLICATION_OCTET_STREAM, "findings.json");
-        HttpEntity fileData = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+                .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
                 .addPart("file", inputStreamBody)
                 .addPart("engagement", new StringBody(engagementId, ContentType.MULTIPART_FORM_DATA))
                 .addPart("scan_type", new StringBody("Dependency Track Finding Packaging Format (FPF) Export", ContentType.MULTIPART_FORM_DATA))
@@ -179,12 +184,15 @@ public class DefectDojoClient {
                 .addPart("minimum_severity", new StringBody("Info", ContentType.MULTIPART_FORM_DATA))
                 .addPart("close_old_findings", new StringBody("true", ContentType.MULTIPART_FORM_DATA))
                 .addPart("push_to_jira", new StringBody("false", ContentType.MULTIPART_FORM_DATA))
-                .addPart("do_not_reactivate", new StringBody(doNotReactivate.toString(), ContentType.MULTIPART_FORM_DATA))
-                .addPart("test", new StringBody(testId, ContentType.MULTIPART_FORM_DATA))
-                .addPart("scan_date", new StringBody(DATE_FORMAT.format(new Date()), ContentType.MULTIPART_FORM_DATA))
-                .addPart("test_title", new StringBody(testTitle, ContentType.MULTIPART_FORM_DATA))
-                .build();
-        request.setEntity(fileData);
+                .addPart("scan_date", new StringBody(DATE_FORMAT.format(new Date()), ContentType.MULTIPART_FORM_DATA));
+
+        if (testTitle != null) {
+            builder.addPart("test_title", new StringBody(testTitle, ContentType.MULTIPART_FORM_DATA));
+        }
+
+        HttpEntity data = builder.build();
+        request.setEntity(data);
+
         try (CloseableHttpResponse response = HttpClientPool.getClient().execute(request)) {
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                 LOGGER.debug("Successfully reimport findings to DefectDojo");
